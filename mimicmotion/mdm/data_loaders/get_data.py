@@ -3,16 +3,7 @@ from data_loaders.tensors import collate as all_collate
 from data_loaders.tensors import t2m_collate
 
 def get_dataset_class(name):
-    if name == "amass":
-        from .amass import AMASS
-        return AMASS
-    elif name == "uestc":
-        from .a2m.uestc import UESTC
-        return UESTC
-    elif name == "humanact12":
-        from .a2m.humanact12poses import HumanAct12Poses
-        return HumanAct12Poses
-    elif name == "humanml":
+    if name == "humanml":
         from data_loaders.humanml.data.dataset import HumanML3D
         return HumanML3D
     elif name == "kit":

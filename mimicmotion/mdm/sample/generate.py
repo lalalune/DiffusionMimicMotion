@@ -87,15 +87,7 @@ def main():
         _, model_kwargs = next(iterator)
     else:
         collate_args = [{'inp': torch.zeros(n_frames), 'tokens': None, 'lengths': n_frames}] * args.num_samples
-        is_t2m = any([args.input_text, args.text_prompt])
-        if is_t2m:
-            # t2m
-            collate_args = [dict(arg, text=txt) for arg, txt in zip(collate_args, texts)]
-        else:
-            # a2m
-            action = data.dataset.action_name_to_action(action_text)
-            collate_args = [dict(arg, action=one_action, action_text=one_action_text) for
-                            arg, one_action, one_action_text in zip(collate_args, action, action_text)]
+        collate_args = [dict(arg, text=txt) for arg, txt in zip(collate_args, texts)]
         _, model_kwargs = collate(collate_args)
 
     all_motions = []

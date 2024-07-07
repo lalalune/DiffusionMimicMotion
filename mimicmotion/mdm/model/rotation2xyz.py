@@ -5,11 +5,11 @@ import utils.rotation_conversions as geometry
 
 from model.smpl import SMPL, JOINTSTYPE_ROOT
 # from .get_model import JOINTSTYPES
-JOINTSTYPES = ["a2m", "a2mpl", "smpl", "vibe", "vertices"]
+JOINTSTYPES = ["smpl", "vibe", "vertices"]
 
 
 class Rotation2xyz:
-    def __init__(self, device, dataset='amass'):
+    def __init__(self, device, dataset='humanml'):
         self.device = device
         self.dataset = dataset
         self.smpl_model = SMPL().eval().to(device)

@@ -104,40 +104,6 @@ def add_data_options(parser):
                        help="If empty, will use defaults according to the specified dataset.")
 
 
-def add_training_options(parser):
-    group = parser.add_argument_group('training')
-    group.add_argument("--save_dir", required=True, type=str,
-                       help="Path to save checkpoints and results.")
-    group.add_argument("--overwrite", action='store_true',
-                       help="If True, will enable to use an already existing save_dir.")
-    group.add_argument("--train_platform_type", default='NoPlatform', choices=['NoPlatform', 'ClearmlPlatform', 'TensorboardPlatform'], type=str,
-                       help="Choose platform to log results. NoPlatform means no logging.")
-    group.add_argument("--lr", default=1e-4, type=float, help="Learning rate.")
-    group.add_argument("--weight_decay", default=0.0, type=float, help="Optimizer weight decay.")
-    group.add_argument("--lr_anneal_steps", default=0, type=int, help="Number of learning rate anneal steps.")
-    group.add_argument("--eval_batch_size", default=32, type=int,
-                       help="Batch size during evaluation loop. Do not change this unless you know what you are doing. "
-                            "T2m precision calculation is based on fixed batch size 32.")
-    group.add_argument("--eval_split", default='test', choices=['val', 'test'], type=str,
-                       help="Which split to evaluate on during training.")
-    group.add_argument("--eval_during_training", action='store_true',
-                       help="If True, will run evaluation during training.")
-    group.add_argument("--eval_rep_times", default=3, type=int,
-                       help="Number of repetitions for evaluation loop during training.")
-    group.add_argument("--eval_num_samples", default=1_000, type=int,
-                       help="If -1, will use all samples in the specified split.")
-    group.add_argument("--log_interval", default=1_000, type=int,
-                       help="Log losses each N steps")
-    group.add_argument("--save_interval", default=50_000, type=int,
-                       help="Save checkpoints and run evaluation each N steps")
-    group.add_argument("--num_steps", default=600_000, type=int,
-                       help="Training will stop after the specified number of steps.")
-    group.add_argument("--num_frames", default=60, type=int,
-                       help="Limit for the maximal number of frames. In HumanML3D and KIT this field is ignored.")
-    group.add_argument("--resume_checkpoint", default="", type=str,
-                       help="If not empty, will start from the specified checkpoint (path to model###.pt file).")
-
-
 def add_sampling_options(parser):
     group = parser.add_argument_group('sampling')
     group.add_argument("--model_path", required=True, type=str,
@@ -171,36 +137,6 @@ def add_generate_options(parser):
                        help="An action name to be generated. If empty, will take text prompts from dataset.")
 
 
-def add_edit_options(parser):
-    group = parser.add_argument_group('edit')
-    group.add_argument("--edit_mode", default='in_between', choices=['in_between', 'upper_body'], type=str,
-                       help="Defines which parts of the input motion will be edited.\n"
-                            "(1) in_between - suffix and prefix motion taken from input motion, "
-                            "middle motion is generated.\n"
-                            "(2) upper_body - lower body joints taken from input motion, "
-                            "upper body is generated.")
-    group.add_argument("--text_condition", default='', type=str,
-                       help="Editing will be conditioned on this text prompt. "
-                            "If empty, will perform unconditioned editing.")
-    group.add_argument("--prefix_end", default=0.25, type=float,
-                       help="For in_between editing - Defines the end of input prefix (ratio from all frames).")
-    group.add_argument("--suffix_start", default=0.75, type=float,
-                       help="For in_between editing - Defines the start of input suffix (ratio from all frames).")
-
-
-def add_evaluation_options(parser):
-    group = parser.add_argument_group('eval')
-    group.add_argument("--model_path", required=True, type=str,
-                       help="Path to model####.pt file to be sampled.")
-    group.add_argument("--eval_mode", default='wo_mm', choices=['wo_mm', 'mm_short', 'debug', 'full'], type=str,
-                       help="wo_mm (t2m only) - 20 repetitions without multi-modality metric; "
-                            "mm_short (t2m only) - 5 repetitions with multi-modality metric; "
-                            "debug - short run, less accurate results."
-                            "full (a2m only) - 20 repetitions.")
-    group.add_argument("--guidance_param", default=2.5, type=float,
-                       help="For classifier-free sampling - specifies the s parameter, as defined in the paper.")
-
-
 def get_cond_mode(args):
     if args.unconstrained:
         cond_mode = 'no_cond'
@@ -209,16 +145,6 @@ def get_cond_mode(args):
     else:
         cond_mode = 'action'
     return cond_mode
-
-
-def train_args():
-    parser = ArgumentParser()
-    add_base_options(parser)
-    add_data_options(parser)
-    add_model_options(parser)
-    add_diffusion_options(parser)
-    add_training_options(parser)
-    return parser.parse_args()
 
 
 def generate_args():
@@ -236,20 +162,3 @@ def generate_args():
         raise Exception('Arguments action_file and action_name should not be used for a text condition. Please use input_text or text_prompt.')
 
     return args
-
-
-def edit_args():
-    parser = ArgumentParser()
-    # args specified by the user: (all other will be loaded from the model)
-    add_base_options(parser)
-    add_sampling_options(parser)
-    add_edit_options(parser)
-    return parse_and_load_from_model(parser)
-
-
-def evaluation_parser():
-    parser = ArgumentParser()
-    # args specified by the user: (all other will be loaded from the model)
-    add_base_options(parser)
-    add_evaluation_options(parser)
-    return parse_and_load_from_model(parser)

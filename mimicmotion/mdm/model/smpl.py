@@ -14,9 +14,8 @@ action2motion_joints = [8, 1, 2, 3, 4, 5, 6, 7, 0, 9, 10, 11, 12, 13, 14, 21, 24
 
 from utils.config import SMPL_MODEL_PATH, JOINT_REGRESSOR_TRAIN_EXTRA
 
-JOINTSTYPE_ROOT = {"a2m": 0, # action2motion
+JOINTSTYPE_ROOT = {
                    "smpl": 0,
-                   "a2mpl": 0, # set(smpl, a2m)
                    "vibe": 8}  # 0 is the 8 position: OP MidHip below
 
 JOINT_MAP = {
@@ -74,14 +73,10 @@ class SMPL(_SMPLLayer):
         J_regressor_extra = np.load(JOINT_REGRESSOR_TRAIN_EXTRA)
         self.register_buffer('J_regressor_extra', torch.tensor(J_regressor_extra, dtype=torch.float32))
         vibe_indexes = np.array([JOINT_MAP[i] for i in JOINT_NAMES])
-        a2m_indexes = vibe_indexes[action2motion_joints]
         smpl_indexes = np.arange(24)
-        a2mpl_indexes = np.unique(np.r_[smpl_indexes, a2m_indexes])
 
         self.maps = {"vibe": vibe_indexes,
-                     "a2m": a2m_indexes,
-                     "smpl": smpl_indexes,
-                     "a2mpl": a2mpl_indexes}
+                     "smpl": smpl_indexes}
         
     def forward(self, *args, **kwargs):
         smpl_output = super(SMPL, self).forward(*args, **kwargs)
